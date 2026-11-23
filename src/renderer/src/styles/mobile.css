@@ -1,0 +1,343 @@
+/* Test oynasi, modal va tortma panellarning telefon mantig'i (tuzilma). Ko'rinish: app.css */
+@media (max-width: 760px) {
+  html.web-app .overlay,
+  html.web-app .modal-overlay,
+  html.web-app .confirm-modal-overlay {
+    padding: max(10px, env(safe-area-inset-top, 0px))
+      max(10px, env(safe-area-inset-right, 0px))
+      max(10px, env(safe-area-inset-bottom, 0px))
+      max(10px, env(safe-area-inset-left, 0px));
+  }
+  html.web-app .drawer {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px);
+    height: auto;
+    min-height: 0;
+    padding: 16px;
+    overflow: auto;
+  }
+  html.web-app .drawer-image-mode {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+  html.web-app .help-viewer {
+    width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px);
+  }
+  html.web-app .help-viewer.is-image-mode {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+  }
+  html.web-app .help-modal-frame:not(.is-image-mode) .drawer-header {
+    padding: 12px 14px 0;
+  }
+  html.web-app .help-modal-body:not(.drawer-body-image) {
+    padding: 0 14px 14px;
+    font-size: 15px;
+  }
+  html.web-app .help-modal-body.drawer-body-image img,
+  html.web-app .help-image-viewport {
+    max-height: calc(100dvh - 100px);
+  }
+  html.web-app .modal,
+  html.web-app .confirm-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+  html.web-app .test-page,
+  html.web-app .test-shell,
+  html.web-app .test-main {
+    min-height: 0;
+    min-width: 0;
+  }
+  html.web-app .test-topbar {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  html.web-app .test-topbar:not(.is-compact) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+  }
+  html.web-app .test-topbar-heading {
+    width: 100%;
+    min-width: 0;
+  }
+  html.web-app .test-topbar.is-compact .test-topbar-heading {
+    display: none;
+  }
+  html.web-app .test-topbar.is-compact .test-result-summary {
+    display: none;
+  }
+  html.web-app .test-topbar.is-compact .test-topbar-actions {
+    flex: 0 0 100%;
+    justify-content: flex-start;
+  }
+  html.web-app .test-topbar-actions .header-title-toggle {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    height: 30px;
+    min-height: 30px;
+    flex: 0 0 36px;
+    padding: 0;
+    margin-right: auto;
+    border-radius: 50%;
+    box-sizing: border-box;
+    line-height: 0;
+    border: 1px solid var(--stroke);
+    background: rgb(var(--surface-2));
+    box-shadow: none;
+    transition: none;
+  }
+  html.web-app .test-topbar-actions .header-title-toggle:hover,
+  html.web-app .test-topbar-actions .header-title-toggle:active,
+  html.web-app .test-topbar-actions .header-title-toggle:focus,
+  html.web-app .test-topbar-actions .header-title-toggle:focus-visible {
+    border-color: var(--stroke);
+    background: rgb(var(--surface-2));
+    box-shadow: none;
+    transform: none;
+    outline: 1px solid var(--stroke);
+    outline-offset: 0;
+  }
+  html.web-app .test-topbar.is-compact .test-topbar-heading .q-chip {
+    display: none;
+  }
+  html.web-app .test-topbar-heading .title {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+  }
+  html.web-app .test-topbar-heading .q-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  html.web-app .test-topbar:not(.is-compact) > .test-result-summary {
+    position: static;
+    left: auto;
+    display: flex;
+    width: 100%;
+    min-height: 28px;
+    max-width: none;
+    justify-content: center;
+    flex: none;
+    gap: 4px;
+    transform: none;
+    white-space: nowrap;
+  }
+  html.web-app .test-topbar:not(.is-compact) > .test-result-summary span {
+    font-size: 12px;
+  }
+  html.web-app .test-topbar:not(.is-compact) > .test-result-summary strong {
+    font-size: 14px;
+  }
+  html.web-app .header-title-toggle svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    margin: auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  html.web-app .question-card {
+    min-height: 0;
+    padding: 0;
+    overscroll-behavior: contain;
+  }
+  html.web-app .question-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  html.web-app .question-layout > .question-text {
+    flex: none;
+    padding-inline: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  html.web-app .question-visual {
+    order: -1;
+    flex: none;
+    width: 100%;
+    height: clamp(170px, 32dvh, 250px);
+    min-height: 170px;
+    padding: 0;
+    border-radius: 16px 16px 0 0;
+  }
+  html.web-app .question-visual .question-image {
+    border-radius: 12px 12px 0 0;
+  }
+  html.web-app .question-copy {
+    flex: none;
+    width: 100%;
+    padding: 0 12px 12px;
+  }
+  html.web-app .option-btn {
+    min-height: 48px;
+    text-align: left;
+  }
+  html.web-app .test-navigation {
+    position: relative;
+    z-index: 3;
+    flex: none;
+    min-width: 0;
+    min-height: 64px;
+    gap: 6px;
+    justify-content: flex-start;
+    padding: 4px 6px 6px;
+    border-radius: 30px;
+  }
+  html.web-app .question-grid-panel {
+    display: contents;
+  }
+  html.web-app .question-grid-panel > .q-grid {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 40px !important;
+    max-height: 40px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+  }
+  html.web-app .question-grid-panel.is-open {
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    bottom: -6px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    max-height: min(45dvh, calc(100dvh - 180px));
+    padding: 8px;
+    overflow: hidden;
+    border: 1px solid var(--stroke);
+    border-radius: 24px;
+    background: rgb(var(--surface));
+    box-shadow: var(--shadow);
+  }
+  html.web-app .question-grid-panel.is-open > .q-grid {
+    width: 100%;
+    height: auto !important;
+    max-height: none;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+  html.web-app .question-grid-panel .q-grid-page {
+    display: flex;
+    width: max-content;
+    min-width: max-content;
+    gap: 4px;
+    padding: 2px;
+  }
+  html.web-app .question-grid-panel.is-open .q-grid-page {
+    display: grid;
+    width: 100%;
+    min-width: 100%;
+    grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)) !important;
+    grid-auto-rows: 36px;
+  }
+  html.web-app .question-grid-panel .q-dot {
+    flex: 0 0 30px;
+    width: 30px;
+    height: 36px;
+    min-height: 36px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  html.web-app .question-grid-panel.is-open .q-dot {
+    width: 100%;
+    flex: initial;
+  }
+  html.web-app .q-grid {
+    flex: 1;
+    min-width: 0;
+    height: 48px !important;
+    max-height: 48px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+  }
+  html.web-app .q-grid-page {
+    display: flex;
+    width: max-content;
+    min-width: max-content;
+    gap: 6px;
+    padding: 2px;
+  }
+  html.web-app .q-dot {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    font-size: 14px;
+  }
+}
+
+@media (max-height: 620px) and (max-width: 760px) {
+  html.web-app .content:has(.test-page) {
+    padding: 2px 6px 6px;
+  }
+  html.web-app .test-topbar {
+    gap: 5px;
+    padding: 5px 8px;
+  }
+  html.web-app .test-topbar-actions {
+    min-height: 34px;
+    gap: 6px;
+  }
+  html.web-app .q-chip {
+    padding: 3px 7px;
+    font-size: 11px;
+  }
+  html.web-app .question-text {
+    font-size: 17px;
+    line-height: 1.4;
+  }
+  html.web-app .option-btn {
+    min-height: 42px;
+    padding: 7px 9px;
+    gap: 6px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  html.web-app .option-label {
+    min-width: 36px;
+    margin: -7px 2px -7px -9px;
+    padding: 0 7px;
+  }
+  html.web-app .test-main {
+    gap: 4px;
+  }
+  html.web-app .question-visual {
+    height: 21dvh;
+    min-height: 100px;
+  }
+  html.web-app .test-topbar {
+    padding-block: 4px;
+  }
+}
+
+@media (max-width: 600px) {
+  html.web-app .practice-count-modal .practice-timed-extra {
+    display: none;
+  }
+}
