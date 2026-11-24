@@ -1,4 +1,4 @@
-/* Service worker: ilova qobig'ini keshlaydi, rasmlar esa ko'rsatilganda ilova ichida keshlanadi. */
+/* Service worker: faqat ilova qobig'ini keshlaydi. Savollar (IndexedDB) va rasmlar (Cache Storage) ilova kodida saqlanadi. */
 const VERSION = '__BUILD_VERSION__'
 const SHELL_CACHE = `pdd-shell-${VERSION}`
 const SHELL_FILES = __SHELL_FILES__
@@ -29,6 +29,11 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
 
   if (url.origin !== self.location.origin) return // Supabase API va boshqalar: tarmoqqa
+
+  // Savol snapshot'i va rasmlar: service worker aralashmaydi.
+  // - /data/version.json har safar tarmoqdan olinadi (aks holda yangi nashr hech qachon ko'rinmaydi);
+  // - snapshot IndexedDB'da, rasmlar esa ilova ichidagi Cache Storage'da ('pdd-images-v1') saqlanadi.
+  if (url.pathname.startsWith('/data/') || url.pathname.startsWith('/basa_img/')) return
 
   // Sahifa navigatsiyasi: tarmoq birinchi, oflaynda keshdagi index.html
   if (request.mode === 'navigate') {

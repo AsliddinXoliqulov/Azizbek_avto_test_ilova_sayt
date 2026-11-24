@@ -48,6 +48,8 @@ async function readJsonResponse(response, resourceName) {
 
 async function fetchSnapshot(signal) {
   const versionUrl = new URL('./data/version.json', window.location.href)
+  // Vaqt belgisi: eski service worker yoki oraliq kesh eski versiyani qaytarib yubormasligi uchun.
+  versionUrl.searchParams.set('t', String(Date.now()))
   const versionResponse = await fetch(versionUrl, {
     cache: 'no-store',
     signal,

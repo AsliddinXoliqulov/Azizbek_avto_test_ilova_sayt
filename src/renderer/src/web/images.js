@@ -50,8 +50,10 @@ export function useCachedImageUrl(source) {
         setResolved({ source, url: objectUrl, error: null })
       } catch (error) {
         if (!cancelled) {
-          console.error('[image] Rasmni yuklab yoki keshdan o‘qib bo‘lmadi:', error)
-          setResolved({ source, url: null, error })
+          // Cache Storage ishlamasa (masalan, maxfiy rejim) rasm to‘g‘ridan-to‘g‘ri URL orqali ko‘rsatiladi;
+          // rasm haqiqatan ham yo‘q bo‘lsa <img onError> xatoni o‘zi ushlaydi.
+          console.warn('[image] Keshdan foydalanib bo‘lmadi, to‘g‘ridan-to‘g‘ri URL ishlatiladi:', error)
+          setResolved({ source, url: source, error: null })
         }
       }
     }

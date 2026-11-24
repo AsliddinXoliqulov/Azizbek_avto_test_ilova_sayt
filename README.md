@@ -36,7 +36,7 @@ migratsiyasini ham bajaring; u qurilma cheklovini olib tashlaydi.
 
 1. Supabase SQL Editor’da yuqoridagi `supabase_static_site_publish_migration.sql` migratsiyasini
    bir marta bajaring.
-2. `AsliddinXoliqulov/Azizbek_avto_test_ilova` GitHub repozitori Actions secrets’iga
+2. `AsliddinXoliqulov/Azizbek_avto_test_ilova_sayt` GitHub repozitori Actions secrets’iga
    `SUPABASE_URL` va `SUPABASE_SERVICE_ROLE_KEY` qo‘shing.
 3. Admin panel Vercel loyihasiga `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
    `SUPABASE_SERVICE_ROLE_KEY` va faqat serverda ishlatiladigan `GITHUB_WORKFLOW_TOKEN`
