@@ -44,13 +44,12 @@ migratsiyasini ham bajaring; u qurilma cheklovini olib tashlaydi.
    tushirish (`Actions: write`) va oxirgi nashr faylini o‘qish (`Contents: read`) huquqini
    bering; uni brauzerga yoki repoga joylamang.
 4. Sayt Vercel loyihasida build uchun `VITE_SUPABASE_URL` va `VITE_SUPABASE_ANON_KEY`
-   bo‘lishi kerak. Admin paneldagi **Kodlar → Solishtirish** tugmasi GitHub’dagi to‘liq
-   bazani Supabase ma’lumotlari bilan taqqoslab, farqlar va yuklanadigan hajmni ko‘rsatadi.
-   Incremental formatga o‘tishdagi birinchi nashr to‘liq snapshotni bazaviy nusxa qilib
-   yozadi; keyingi nashrlarga faqat qo‘shilgan, yangilangan yoki o‘chirilgan yozuvlar
-   delta sifatida qo‘shiladi. Admindan **Yuklash** tasdig‘i olingach, GitHub Actions
-   snapshot/delta va kerakli rasm fayllarini nashr qiladi; taqqoslashdan so‘ng Supabase
-   o‘zgargan bo‘lsa, nashrni to‘xtatib, qayta solishtirishni talab qiladi.
+   bo‘lishi kerak. Admin paneldagi **Birlashtirish** tugmasida **Butun baza** tanlansa,
+   Supabase’dagi to‘liq baza va barcha rasmlar repodagi `public/data` snapshot, delta
+   va ishlatilmaydigan rasm fayllarini almashtiradi. **Faqat o‘zgarishlar** tanlansa,
+   publisher Supabase’dagi joriy ma’lumotlardan delta yaratib, kerakli yangi rasm
+   fayllarini qo‘shadi. Incremental baseline hali mavjud bo‘lmasa, publisher to‘liq
+   snapshot yaratadi. Har ikki holatda GitHub Actions nashrni bajarib, saytni yangilaydi.
 5. Yangi sayt deploy bo‘lgach, eski savol xatolari/saqlanganlar jadvali va RPC’larini
    o‘chirish uchun Supabase’da
    [`settings/sql/supabase_remove_web_question_progress.sql`](../settings/sql/supabase_remove_web_question_progress.sql)

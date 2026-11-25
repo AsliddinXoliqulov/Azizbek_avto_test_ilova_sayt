@@ -22,6 +22,10 @@ export function jsonHash(value) {
   return createHash('sha256').update(`${stableStringify(value)}\n`).digest('hex')
 }
 
+export function shouldWriteFullBaseline(publishMode, current) {
+  return publishMode === 'full' || !current?.incrementalReady
+}
+
 function recordDelta(before, after, keyOf) {
   const previous = new Map((before || []).map((record) => [keyOf(record), record]))
   const current = new Map((after || []).map((record) => [keyOf(record), record]))

@@ -7,6 +7,7 @@ import {
   applySnapshotDelta,
   createSnapshotDelta,
   jsonHash,
+  shouldWriteFullBaseline,
   snapshotHash,
   snapshotText,
   stableStringify,
@@ -38,6 +39,10 @@ const mimeExtensions = {
 const sha256 = (value) => createHash('sha256').update(value).digest('hex')
 const supabaseUrl = process.env.SUPABASE_URL
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const publishMode = process.env.PUBLISH_MODE || 'changes'
+if (publishMode !== 'full' && publishMode !== 'changes') {
+  throw new Error('PUBLISH_MODE "full" yoki "changes" bo‘lishi kerak.')
+}
 
 if (!supabaseUrl || !serviceRoleKey) {
   throw new Error('SUPABASE_URL va SUPABASE_SERVICE_ROLE_KEY muhit o‘zgaruvchilari kerak.')
@@ -410,7 +415,9 @@ async function main() {
     )
   }
   const versionPath = path.join(dataDir, 'version.json')
+  const writeFullBaseline = shouldWriteFullBaseline(publishMode, current)
   if (
+    !writeFullBaseline &&
     current?.incrementalReady &&
     stableStringify(current.snapshot) === stableStringify(snapshot)
   ) {
@@ -420,7 +427,7 @@ async function main() {
   }
 
   let payloadBytes
-  if (!current || !current.incrementalReady) {
+  if (writeFullBaseline) {
     const snapshotName = `${version}.json`
     const snapshotJson = snapshotText(snapshot)
     fs.writeFileSync(path.join(snapshotsDir, snapshotName), snapshotJson, 'utf8')
@@ -482,7 +489,7 @@ async function main() {
 
   pruneImageFiles(new Set(imageAssets.map((asset) => path.basename(asset.path))))
   console.log(
-    `Static ${current?.incrementalReady ? 'delta' : 'to‘liq bazaviy snapshot'} tayyor: ${rows.length} savol; ` +
+    `Static ${writeFullBaseline ? 'to‘liq bazaviy snapshot' : 'delta'} tayyor: ${rows.length} savol; ` +
     `${payloadBytes} bayt jami (${newImageBytes} bayt yangi rasm), ` +
     `versiya ${version}`
   )

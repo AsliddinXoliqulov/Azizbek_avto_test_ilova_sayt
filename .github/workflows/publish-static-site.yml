@@ -1,14 +1,22 @@
 name: Publish website data
 
-# Admin panelda solishtirib, "Yuklash" tasdiqlanganda workflow ishga tushadi.
+# Admin modalida tanlangan to‘liq baza yoki o‘zgarishlar nashr qilinadi.
 # Supabase -> savollar snapshot'i (public/data) -> shu repoga push -> Vercel qayta deploy.
 on:
   workflow_dispatch:
     inputs:
       expected_version:
-        description: Preview versiyasi; ma’lumotlar o‘zgargan bo‘lsa nashr to‘xtaydi
+        description: Eski admin versiyasi yuboradigan snapshot hash'i (ixtiyoriy)
         required: false
         type: string
+      publish_mode:
+        description: To‘liq baza yoki faqat o‘zgarishlarni nashr qilish
+        required: true
+        type: choice
+        options:
+          - full
+          - changes
+        default: changes
 
 permissions:
   contents: write
@@ -41,6 +49,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PUBLISH_MODE: ${{ inputs.publish_mode }}
           EXPECTED_SNAPSHOT_VERSION: ${{ inputs.expected_version }}
 
       - name: Commit and push published files

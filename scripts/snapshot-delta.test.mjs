@@ -3,8 +3,19 @@ import test from 'node:test'
 import {
   applySnapshotDelta,
   createSnapshotDelta,
+  shouldWriteFullBaseline,
   snapshotHash,
 } from './snapshot-delta.mjs'
+
+test('full mode replaces the baseline, while changes mode uses deltas when available', () => {
+  const incremental = { incrementalReady: true }
+  const legacy = { incrementalReady: false }
+
+  assert.equal(shouldWriteFullBaseline('full', incremental), true)
+  assert.equal(shouldWriteFullBaseline('changes', incremental), false)
+  assert.equal(shouldWriteFullBaseline('changes', legacy), true)
+  assert.equal(shouldWriteFullBaseline('changes', null), true)
+})
 
 test('delta contains only changed records and reconstructs the complete snapshot', () => {
   const before = {
