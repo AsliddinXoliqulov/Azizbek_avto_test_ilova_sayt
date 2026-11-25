@@ -6,7 +6,6 @@ import { createClient } from '@supabase/supabase-js'
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const publicDir = path.join(root, 'public')
-const imageDir = path.join(publicDir, 'basa_img')
 const dataDir = path.join(publicDir, 'data')
 const snapshotsDir = path.join(dataDir, 'snapshots')
 const pageSize = 500
@@ -38,7 +37,7 @@ function storagePathFromUrl(value) {
   return decodeURIComponent(url.pathname.slice(markerIndex + storagePublicMarker.length))
 }
 
-function staticImagePath(image) {
+function publicStorageUrl(image) {
   const bucketPath = image.storage_path || storagePathFromUrl(image.storage_url)
   if (!bucketPath) {
     if (image.status === 'missing' || image.status === 'missing_remote') return null
@@ -51,17 +50,16 @@ function staticImagePath(image) {
   const pathParts = normalizedPath.split('/')
   if (
     pathParts.some(
-      (part) => !part || part === '.' || !/^[A-Za-z0-9._-]+$/.test(part)
+      (part) => !part || part === '.' || part === '..'
     )
   ) {
-    throw new Error(`Rasm storage path qo‘llab-quvvatlanmaydi: ${normalizedPath}`)
+    throw new Error(`Rasm storage path noto‘g‘ri: ${normalizedPath}`)
   }
-  // Supabase ombori yo‘li: basa_img/<sha256>.png. Repoda esa fayl public/basa_img/<sha256>.png
-  // bo‘lishi kerak (sayt URL: /basa_img/<sha256>.png), shuning uchun bosh "basa_img/" olib tashlanadi.
-  const filePath = pathParts[0] === 'basa_img' && pathParts.length > 1
-    ? pathParts.slice(1).join('/')
-    : normalizedPath
-  return { bucketPath: normalizedPath, filePath }
+  const encodedPath = pathParts.map(encodeURIComponent).join('/')
+  return new URL(
+    `/storage/v1/object/public/${bucketName}/${encodedPath}`,
+    supabaseUrl
+  ).toString()
 }
 
 async function fetchCatalog() {
@@ -114,77 +112,8 @@ async function fetchLessonQuestionOrder() {
   )
 }
 
-class MissingRemoteImageError extends Error {}
-
-function isNotFound(error) {
-  const text = `${error?.message || ''} ${error?.statusCode || ''} ${error?.status || ''}`
-  return /not.?found|404|does not exist/i.test(text)
-}
-
-async function ensureImage(bucketPath, filePath) {
-  const destination = path.join(imageDir, ...filePath.split('/'))
-  if (fs.existsSync(destination) && fs.statSync(destination).size > 0) return
-
-  let lastError = null
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    const { data, error } = await supabase.storage.from(bucketName).download(bucketPath)
-    if (!error && data) {
-      const bytes = Buffer.from(await data.arrayBuffer())
-      if (bytes.length === 0) {
-        lastError = new Error('fayl bo‘sh')
-      } else {
-        fs.mkdirSync(path.dirname(destination), { recursive: true })
-        fs.writeFileSync(destination, bytes)
-        return
-      }
-    } else {
-      lastError = error || new Error('javob bo‘sh')
-      if (isNotFound(lastError)) {
-        throw new MissingRemoteImageError(`Rasm Supabase omborida yo‘q: ${bucketPath}`)
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, attempt * 1000))
-  }
-  throw new Error(`Rasmni Supabase’dan yuklab bo‘lmadi (${bucketPath}): ${lastError?.message || 'noma’lum xato'}`)
-}
-
-async function runPool(items, limit, worker) {
-  let next = 0
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (next < items.length) {
-      const index = next++
-      await worker(items[index], index)
-    }
-  })
-  await Promise.all(runners)
-}
-
-function listFiles(directory, base = directory) {
-  if (!fs.existsSync(directory)) return []
-  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const full = path.join(directory, entry.name)
-    return entry.isDirectory()
-      ? listFiles(full, base)
-      : [path.relative(base, full).replaceAll('\\', '/')]
-  })
-}
-
-function removeEmptyDirectories(directory, keepRoot = true) {
-  if (!fs.existsSync(directory)) return
-  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isDirectory()) removeEmptyDirectories(path.join(directory, entry.name), false)
-  }
-  if (!keepRoot && fs.readdirSync(directory).length === 0) fs.rmdirSync(directory)
-}
-
-function imageDigest(filePath) {
-  const image = fs.readFileSync(path.join(imageDir, ...filePath.split('/')))
-  return createHash('sha256').update(image).digest('hex')
-}
-
 async function main() {
   const publishStartedAt = new Date().toISOString()
-  fs.mkdirSync(imageDir, { recursive: true })
   fs.mkdirSync(snapshotsDir, { recursive: true })
 
   const [catalog, rows, lessonQuestionOrder] = await Promise.all([
@@ -193,8 +122,6 @@ async function main() {
     fetchLessonQuestionOrder(),
   ])
   const warnings = []
-  const imagePaths = new Map()
-  let fallbackImagePath = null
 
   const missingImage = (image) => ({
     ...image,
@@ -205,23 +132,18 @@ async function main() {
 
   for (const row of rows) {
     row.images = (row.images || []).map((image) => {
-      let source
+      let storageUrl
       try {
-        source = staticImagePath(image)
+        storageUrl = publicStorageUrl(image)
       } catch (error) {
         warnings.push(`Savol ${row.id}: ${error.message}`)
         return missingImage(image)
       }
-      if (!source) return { ...image, storage_path: null, storage_url: null }
-      const previousPath = imagePaths.get(source.filePath)
-      if (previousPath && previousPath !== source.bucketPath) {
-        throw new Error(`Bir xil statik rasm yo‘li turli storage path’larda bor: ${source.filePath}`)
-      }
-      imagePaths.set(source.filePath, source.bucketPath)
+      if (!storageUrl) return { ...image, storage_path: null, storage_url: null }
       return {
         ...image,
-        storage_path: `basa_img/${source.filePath}`,
-        storage_url: null,
+        storage_path: null,
+        storage_url: storageUrl,
       }
     })
   }
@@ -229,55 +151,13 @@ async function main() {
   const fallbackImage = catalog.settings?.no_question_image_url
   if (typeof fallbackImage === 'string' && fallbackImage) {
     try {
-      const source = staticImagePath({ storage_url: fallbackImage, status: 'available' })
-      const previousPath = imagePaths.get(source.filePath)
-      if (previousPath && previousPath !== source.bucketPath) {
-        throw new Error(`Bir xil statik rasm yo‘li turli storage path’larda bor: ${source.filePath}`)
-      }
-      imagePaths.set(source.filePath, source.bucketPath)
-      fallbackImagePath = source.filePath
+      catalog.settings.no_question_image_url = publicStorageUrl({
+        storage_url: fallbackImage,
+        status: 'available',
+      })
     } catch (error) {
       warnings.push(`Standart rasm: ${error.message}`)
       delete catalog.settings.no_question_image_url
-    }
-  }
-
-  const imageDigests = new Map()
-  const missingFiles = new Set()
-  const entries = [...imagePaths]
-  let completed = 0
-  await runPool(entries, 6, async ([filePath, bucketPath]) => {
-    try {
-      await ensureImage(bucketPath, filePath)
-      imageDigests.set(filePath, imageDigest(filePath))
-    } catch (error) {
-      if (!(error instanceof MissingRemoteImageError)) throw error
-      warnings.push(error.message)
-      missingFiles.add(filePath)
-    }
-    completed++
-    if (completed % 100 === 0 || completed === entries.length) {
-      console.log(`Rasmlar tekshirildi: ${completed}/${entries.length}`)
-    }
-  })
-
-  for (const row of rows) {
-    row.images = (row.images || []).map((image) => {
-      if (typeof image.storage_path !== 'string') return image
-      const filePath = image.storage_path.slice('basa_img/'.length)
-      if (missingFiles.has(filePath)) return missingImage(image)
-      const digest = imageDigests.get(filePath)
-      if (!digest) throw new Error(`Rasm versiyasi topilmadi: ${filePath}`)
-      return { ...image, storage_path: `${image.storage_path}?v=${digest}` }
-    })
-  }
-  if (fallbackImagePath) {
-    const digest = imageDigests.get(fallbackImagePath)
-    if (!digest) {
-      delete catalog.settings.no_question_image_url
-    } else {
-      catalog.settings.no_question_image_url =
-        `/basa_img/${fallbackImagePath.split('/').map(encodeURIComponent).join('/')}?v=${digest}`
     }
   }
 
@@ -325,26 +205,10 @@ async function main() {
     }
   }
 
-  // Endi hech bir savolga bog‘lanmagan rasmlar repodan olib tashlanadi.
-  // Himoya: ma’lumot bo‘sh kelsa hech narsa o‘chirilmaydi.
-  let pruned = 0
-  if (rows.length > 0 && imagePaths.size > 0) {
-    const keep = new Set(
-      [...imagePaths.keys()].filter((filePath) => !missingFiles.has(filePath))
-    )
-    for (const filePath of listFiles(imageDir)) {
-      if (!keep.has(filePath)) {
-        fs.rmSync(path.join(imageDir, ...filePath.split('/')))
-        pruned++
-      }
-    }
-    removeEmptyDirectories(imageDir)
-  }
-
   for (const warning of warnings) console.warn(`OGOHLANTIRISH: ${warning}`)
   console.log(
-    `Static snapshot tayyor: ${rows.length} savol, ${imagePaths.size - missingFiles.size} rasm, ` +
-    `${pruned} eski rasm tozalandi, ${warnings.length} ogohlantirish, versiya ${version}`
+    `Static snapshot tayyor: ${rows.length} savol; rasm fayllari repoga olinmadi, ` +
+    `${warnings.length} ogohlantirish, versiya ${version}`
   )
 }
 

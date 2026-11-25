@@ -32,7 +32,7 @@ qo‘llangan bo‘lsa, undan keyin
 [`settings/sql/supabase_web_activation_unlimited_devices_migration.sql`](../settings/sql/supabase_web_activation_unlimited_devices_migration.sql)
 migratsiyasini ham bajaring; u qurilma cheklovini olib tashlaydi.
 
-## Savollar va rasmlarni nashr qilish
+## Savollarni nashr qilish
 
 1. Supabase SQL Editor’da yuqoridagi `supabase_static_site_publish_migration.sql` migratsiyasini
    bir marta bajaring.
@@ -45,8 +45,8 @@ migratsiyasini ham bajaring; u qurilma cheklovini olib tashlaydi.
    bering; uni brauzerga yoki repoga joylamang.
 4. Sayt Vercel loyihasida build uchun `VITE_SUPABASE_URL` va `VITE_SUPABASE_ANON_KEY`
    bo‘lishi kerak. Admin paneldagi **Kodlar → Sayt ma’lumotlarini nashr qilish** tugmasi
-   GitHub Actions ishini boshlaydi: u Supabase’dan snapshot va rasmlarni olib repoga push
-   qiladi, so‘ng Vercel qayta deploy qiladi.
+   GitHub Actions ishini boshlaydi: u Supabase’dan snapshot olib repoga push qiladi, so‘ng
+   Vercel qayta deploy qiladi.
 5. Yangi sayt deploy bo‘lgach, eski savol xatolari/saqlanganlar jadvali va RPC’larini
    o‘chirish uchun Supabase’da
    [`settings/sql/supabase_remove_web_question_progress.sql`](../settings/sql/supabase_remove_web_question_progress.sql)
@@ -68,10 +68,9 @@ Vercel: loyihani ulang, Environment Variables'ga `VITE_SUPABASE_URL` va `VITE_SU
 2. **Savollar va katalog.** Ilova `public/data/version.json` orqali joriy snapshot versiyasini
    tekshiradi; yangi snapshot Vercel’dan olinib IndexedDB’da saqlanadi. Supabase RPC’lari
    foydalanuvchi brauzerida chaqirilmaydi.
-3. **Rasmlar.** Admin nashr qilish tugmasini bosganda GitHub Actions rasm fayllarini
-   Supabase’dan `public/basa_img/` ichiga ko‘chiradi; storage papka yo‘llari saqlanadi.
-   Brauzer rasmni Vercel’dan birinchi marta ko‘rganda yuklab Cache Storage’da saqlaydi;
-   keyingi ochishda keshdan foydalanadi.
+3. **Rasmlar.** Rasm fayllari GitHub repoga yoki Vercel’ga ko‘chirilmaydi. Snapshot’da
+   Supabase Storage’ning ommaviy URL’lari saqlanadi; brauzer rasmlarni Supabase’dan talab
+   bo‘yicha yuklab, Cache Storage’da saqlaydi.
 4. **Internetsiz ishlash.** Ilova qobig'i service worker bilan, savollar IndexedDB bilan saqlanadi. Oflayn ijara muddati
    `src/renderer/src/web/activation.js` dagi `OFFLINE_GRACE_MS` (hozir 7 kun; kompyuter ilovasida sinov uchun 1 soat).
    Kod muddati (`activation_expires_at`) bundan qat'i nazar har doim tekshiriladi.
@@ -85,7 +84,7 @@ Vercel: loyihani ulang, Environment Variables'ga `VITE_SUPABASE_URL` va `VITE_SU
 - `src/renderer/src/` — kompyuter ilovasidan ko'chirilgan sahifalar va CSS (o'zgarmagan) + `styles/mobile.css` (telefon moslashuvi).
 - `src/renderer/src/web/` — brauzer qatlami: `api.js` (`window.api`), `engine.js` (SQLite mantig'ining JS ko'chirmasi),
   `sync.js`, `images.js` (rasmlarni talab bo'yicha keshga olish), `activation.js`, `db.js` (IndexedDB), `supabase.js`.
-- `public/` — `manifest.webmanifest`, `sw.js`, ikonkalar, nashr qilingan snapshot va rasmlar.
+- `public/` — `manifest.webmanifest`, `sw.js`, ikonkalar va nashr qilingan snapshot.
 
 ## Cheklovlar
 

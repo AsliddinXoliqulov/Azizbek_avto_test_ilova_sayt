@@ -1,7 +1,7 @@
 name: Publish website data
 
 # Admin paneldagi "Birlashtirish" tugmasi shu workflow'ni ishga tushiradi (workflow_dispatch).
-# Supabase -> savollar snapshot'i (public/data) + rasmlar (public/basa_img) -> shu repoga push -> Vercel qayta deploy.
+# Supabase -> savollar snapshot'i (public/data) -> shu repoga push -> Vercel qayta deploy.
 on:
   workflow_dispatch:
 
@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: npm ci --omit=dev --ignore-scripts
 
-      - name: Build static question snapshot and mirror images
+      - name: Build static question snapshot
         run: node scripts/publish-static-site.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -41,7 +41,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A public/data public/basa_img
+          git add -A public/data
           if git diff --cached --quiet; then
             echo "Static website data is already up to date."
             exit 0
