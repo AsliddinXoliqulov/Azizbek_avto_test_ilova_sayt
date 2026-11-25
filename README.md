@@ -44,11 +44,13 @@ migratsiyasini ham bajaring; u qurilma cheklovini olib tashlaydi.
    tushirish (`Actions: write`) va oxirgi nashr faylini o‘qish (`Contents: read`) huquqini
    bering; uni brauzerga yoki repoga joylamang.
 4. Sayt Vercel loyihasida build uchun `VITE_SUPABASE_URL` va `VITE_SUPABASE_ANON_KEY`
-   bo‘lishi kerak. Admin paneldagi **Kodlar → Solishtirish** tugmasi GitHub’dagi snapshot
-   bilan Supabase ma’lumotlarini taqqoslab, farqlar va yangi snapshot hajmini ko‘rsatadi.
-   Admindan **Yuklash** tasdig‘i olingandan keyin GitHub Actions snapshot’ni push qiladi;
-   taqqoslashdan keyin ma’lumot o‘zgargan bo‘lsa, workflow nashrni to‘xtatib qayta
-   solishtirishni talab qiladi. Rasm fayllari repoga yuklanmaydi.
+   bo‘lishi kerak. Admin paneldagi **Kodlar → Solishtirish** tugmasi GitHub’dagi to‘liq
+   bazani Supabase ma’lumotlari bilan taqqoslab, farqlar va yuklanadigan hajmni ko‘rsatadi.
+   Incremental formatga o‘tishdagi birinchi nashr to‘liq snapshotni bazaviy nusxa qilib
+   yozadi; keyingi nashrlarga faqat qo‘shilgan, yangilangan yoki o‘chirilgan yozuvlar
+   delta sifatida qo‘shiladi. Admindan **Yuklash** tasdig‘i olingach, GitHub Actions
+   snapshot/delta va kerakli rasm fayllarini nashr qiladi; taqqoslashdan so‘ng Supabase
+   o‘zgargan bo‘lsa, nashrni to‘xtatib, qayta solishtirishni talab qiladi.
 5. Yangi sayt deploy bo‘lgach, eski savol xatolari/saqlanganlar jadvali va RPC’larini
    o‘chirish uchun Supabase’da
    [`settings/sql/supabase_remove_web_question_progress.sql`](../settings/sql/supabase_remove_web_question_progress.sql)
@@ -67,12 +69,16 @@ Vercel: loyihani ulang, Environment Variables'ga `VITE_SUPABASE_URL` va `VITE_SU
    Kod yaratilganidan 15 kun o'tgach muddati tugaydi; shu vaqtdan keyin saytga kirish ham bloklanadi.
    Brauzer fingerprinti faqat har bir brauzerning aktivatsiya va sinxronlash holatini aniqlash uchun
    ishlatiladi; bitta kodni qayta kiritib, boshqa brauzer yoki qurilmada ham faollashtirish mumkin.
-2. **Savollar va katalog.** Ilova `public/data/version.json` orqali joriy snapshot versiyasini
-   tekshiradi; yangi snapshot Vercel’dan olinib IndexedDB’da saqlanadi. Supabase RPC’lari
-   foydalanuvchi brauzerida chaqirilmaydi.
-3. **Rasmlar.** Rasm fayllari GitHub repoga yoki Vercel’ga ko‘chirilmaydi. Snapshot’da
-   Supabase Storage’ning ommaviy URL’lari saqlanadi; brauzer rasmlarni Supabase’dan talab
-   bo‘yicha yuklab, Cache Storage’da saqlaydi.
+2. **Savollar va katalog.** Ilova `public/data/version.json` orqali joriy versiyani tekshiradi.
+   Birinchi to‘liq snapshot yoki qurilmada mavjud bo‘lmagan versiya bazaviy nusxadan yuklanadi;
+   mos versiyasi bor qurilma esa faqat undan keyingi delta’larni oladi va IndexedDB’ga qo‘llaydi.
+   Supabase RPC’lari foydalanuvchi brauzerida chaqirilmaydi.
+3. **Rasmlar.** Rasm fayllari Supabase Storage’dan olinib, GitHub reposidagi
+   `public/data/images/` ichida SHA-256 nomi bilan saqlanadi. Snapshot’da repodagi statik
+   yo‘llar yoziladi; birinchi to‘liq nashr barcha ishlatilayotgan rasmlarni, keyingi nashrlar
+   esa faqat yangi yoki o‘zgargan rasm fayllarini qo‘shadi. Brauzer ularni talab bo‘yicha
+   yuklab, Cache Storage’da saqlaydi. GitHub’da bitta rasm fayli 100 MB’dan kichik bo‘lishi
+   kerak; yangi rasm versiyalari repoda joy egallashda davom etadi.
 4. **Internetsiz ishlash.** Ilova qobig'i service worker bilan, savollar IndexedDB bilan saqlanadi. Oflayn ijara muddati
    `src/renderer/src/web/activation.js` dagi `OFFLINE_GRACE_MS` (hozir 8 kun; kompyuter ilovasida sinov uchun 1 soat). Internet qayta ulanganda Supabase tekshiruvi fonda bajariladi; aktivatsiya oynasi kod faol emasligi tasdiqlanganda yoki 8 kunlik muddat tugab tekshiruv imkonsiz bo‘lganda ko‘rsatiladi. Muvaffaqiyatli tekshiruv muddatni yana 8 kunga yangilaydi.
    Kod muddati (`activation_expires_at`) bundan qat'i nazar har doim tekshiriladi.
@@ -86,7 +92,7 @@ Vercel: loyihani ulang, Environment Variables'ga `VITE_SUPABASE_URL` va `VITE_SU
 - `src/renderer/src/` — kompyuter ilovasidan ko'chirilgan sahifalar va CSS (o'zgarmagan) + `styles/mobile.css` (telefon moslashuvi).
 - `src/renderer/src/web/` — brauzer qatlami: `api.js` (`window.api`), `engine.js` (SQLite mantig'ining JS ko'chirmasi),
   `sync.js`, `images.js` (rasmlarni talab bo'yicha keshga olish), `activation.js`, `db.js` (IndexedDB), `supabase.js`.
-- `public/` — `manifest.webmanifest`, `sw.js`, ikonkalar va nashr qilingan snapshot.
+- `public/` — `manifest.webmanifest`, `sw.js`, ikonkalar, bazaviy snapshot va incremental delta’lar.
 
 ## Cheklovlar
 
