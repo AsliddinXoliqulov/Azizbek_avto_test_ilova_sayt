@@ -1,11 +1,18 @@
 {
   "schemaVersion": 2,
-  "version": "9f0f9837129fe1904cb82f21cb9381989d1cc851dc992663a1bfd441d072b2f7",
+  "version": "ea3414ef2ce523a6be576bb4346ed96038e92d77c78938a84d06a853bac41933",
   "baseline": {
     "version": "9f0f9837129fe1904cb82f21cb9381989d1cc851dc992663a1bfd441d072b2f7",
     "snapshot": "snapshots/9f0f9837129fe1904cb82f21cb9381989d1cc851dc992663a1bfd441d072b2f7.json"
   },
-  "deltas": [],
+  "deltas": [
+    {
+      "fromVersion": "9f0f9837129fe1904cb82f21cb9381989d1cc851dc992663a1bfd441d072b2f7",
+      "version": "ea3414ef2ce523a6be576bb4346ed96038e92d77c78938a84d06a853bac41933",
+      "path": "deltas/c54e614e49b2e62abe0477ce33f31656e8d7a44ea3b21daca892a3dc6523d6d5.json",
+      "sha256": "c54e614e49b2e62abe0477ce33f31656e8d7a44ea3b21daca892a3dc6523d6d5"
+    }
+  ],
   "imageAssets": [
     {
       "path": "images/001427f54470e2f02a2aa38209196dd7a78ef35051a5d53a740b68181cef1da6.png",
@@ -4624,5 +4631,5 @@
       "bytes": 326942
     }
   ],
-  "publishedAt": "2026-11-25T14:11:55.273Z"
+  "publishedAt": "2026-11-25T19:41:40.229Z"
 }
