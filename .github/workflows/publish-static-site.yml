@@ -1,9 +1,14 @@
 name: Publish website data
 
-# Admin paneldagi "Birlashtirish" tugmasi shu workflow'ni ishga tushiradi (workflow_dispatch).
+# Admin panelda solishtirib, "Yuklash" tasdiqlanganda workflow ishga tushadi.
 # Supabase -> savollar snapshot'i (public/data) -> shu repoga push -> Vercel qayta deploy.
 on:
   workflow_dispatch:
+    inputs:
+      expected_version:
+        description: Preview versiyasi; ma’lumotlar o‘zgargan bo‘lsa nashr to‘xtaydi
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -36,6 +41,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          EXPECTED_SNAPSHOT_VERSION: ${{ inputs.expected_version }}
 
       - name: Commit and push published files
         run: |

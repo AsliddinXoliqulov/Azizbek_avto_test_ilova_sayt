@@ -3,9 +3,9 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs'
 import { supabase } from './supabase'
 import { metaGet, metaSet } from './engine'
 
-// Kompyuter ilovasida 1 soat (sinov qiymati). Telefonda internetsiz ishlash uchun 7 kun.
+// Kompyuter ilovasida 1 soat (sinov qiymati). Telefonda internetsiz ishlash uchun 8 kun.
 // Kod muddati (activation_expires_at) bundan qat'i nazar har doim tekshiriladi.
-export const OFFLINE_GRACE_MS = 7 * 24 * 60 * 60 * 1000
+export const OFFLINE_GRACE_MS = 8 * 24 * 60 * 60 * 1000
 
 const MESSAGES = {
   INVALID_CODE: "Kod noto'g'ri. Qaytadan tekshirib kiriting.",
@@ -65,15 +65,15 @@ export function status() {
     metaGet('activated') === '1' && metaGet('activation_platform') === 'website'
   if (metaGet('activated') === '1' && !locallyActivated) metaSet('activated', '0')
   const leaseValid = locallyActivated && hasCurrentOfflineLease()
+  const leaseExpired =
+    metaGet('activation_platform') === 'website' &&
+    Boolean(metaGet('activated_at') || metaGet('activation_code')) &&
+    !hasCurrentOfflineLease()
   if (locallyActivated && !leaseValid) metaSet('activated', '0')
   return {
     activated: leaseValid,
-    leaseExpired: locallyActivated && !leaseValid,
-    reactivationPending:
-      metaGet('activation_recheck_required') === '1' ||
-      (metaGet('activation_platform') === 'website' &&
-        metaGet('activated') !== '1' &&
-        Boolean(metaGet('activated_at'))),
+    leaseExpired,
+    reactivationPending: metaGet('activation_recheck_required') === '1',
     lastOnlineCheckAt: numberMeta('last_online_check_at'),
     deviceId: metaGet('device_id'),
   }
@@ -202,6 +202,7 @@ export async function revalidate() {
     if (error) return status()
     if (data?.active !== true) {
       await metaSet('activated', '0')
+      await metaSet('activation_recheck_required', '1')
       return status()
     }
     const now = Date.now()

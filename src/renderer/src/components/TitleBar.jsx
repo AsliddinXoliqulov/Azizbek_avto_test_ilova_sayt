@@ -7,6 +7,7 @@ import {
   IconLogOut,
   IconUser,
 } from './Icons'
+import { useConfirm } from './ConfirmProvider'
 import { useLanguage, useUi } from '../i18n'
 import darkBrand from '../../../logo-dark.png'
 import lightBrand from '../../../logo-light.png'
@@ -34,6 +35,7 @@ export default function TitleBar({
   showLogout = true,
 }) {
   const t = useUi()
+  const confirm = useConfirm()
   const { language, setLanguage } = useLanguage()
   const location = useLocation()
   const navigate = useNavigate()

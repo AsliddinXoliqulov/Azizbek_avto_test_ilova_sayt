@@ -169,6 +169,12 @@ async function main() {
   }
   const snapshotJson = `${JSON.stringify(snapshot)}\n`
   const version = createHash('sha256').update(snapshotJson).digest('hex')
+  const expectedVersion = process.env.EXPECTED_SNAPSHOT_VERSION
+  if (expectedVersion && expectedVersion !== version) {
+    throw new Error(
+      'Taqqoslashdan keyin Supabase ma’lumotlari o‘zgargan. Avval qayta solishtiring.'
+    )
+  }
   const snapshotName = `${version}.json`
   const versionPath = path.join(dataDir, 'version.json')
   let publishedAt = publishStartedAt

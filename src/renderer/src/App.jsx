@@ -30,6 +30,20 @@ export default function App() {
   const refreshBase = useCallback(async () => {
     setSyncError('')
     setSyncing(true)
+    const requireActivationForSync = async () => {
+      const status = await window.api.activation.status()
+      if (
+        isWebApp &&
+        status.leaseExpired &&
+        !status.reactivationPending &&
+        navigator.onLine
+      ) {
+        return
+      }
+      await window.api.activation.requireReactivation()
+      setActivationNotice('syncActivationRequired')
+      setActivated(false)
+    }
     try {
       const result = await window.api.sync.refreshBase()
       if (result.ok && !result.skipped) {
@@ -40,9 +54,7 @@ export default function App() {
           isWebApp &&
           String(result.message || '').includes('DEVICE_NOT_ACTIVATED')
         ) {
-          await window.api.activation.requireReactivation()
-          setActivationNotice('syncActivationRequired')
-          setActivated(false)
+          await requireActivationForSync()
           return
         }
         setSyncError(result.message || 'Noma’lum sinxronlash xatosi.')
@@ -53,9 +65,7 @@ export default function App() {
         isWebApp &&
         String(error?.message || '').includes('DEVICE_NOT_ACTIVATED')
       ) {
-        await window.api.activation.requireReactivation()
-        setActivationNotice('syncActivationRequired')
-        setActivated(false)
+        await requireActivationForSync()
         return
       }
       setSyncError(error?.message || 'Noma’lum sinxronlash xatosi.')
@@ -75,20 +85,27 @@ export default function App() {
         setActivationNotice('syncActivationRequired')
       }
     }
-    window.api.activation.status().then(applyStatus)
     const off = window.api.activation.onChanged(applyStatus)
-    const offRequired = window.api.activation.onRequired(() =>
-      setActivated(false)
-    )
     window.api.settings.get().then((settings) => setLanguage(settings.language))
 
     let checking = false
-    const revalidate = async () => {
+    const revalidateIfDue = async (force = false) => {
       if (checking) return
       checking = true
       try {
         const status = await window.api.activation.status()
-        if (status.reactivationPending) return
+        const shouldCheck = navigator.onLine && (
+          force
+            ? status.activated || status.leaseExpired || status.reactivationPending
+            : status.leaseExpired && !status.reactivationPending
+        )
+        if (!shouldCheck) {
+          applyStatus(status)
+          return
+        }
+        if (status.leaseExpired && !status.activated && !status.reactivationPending) {
+          setActivated(null)
+        }
         applyStatus(await window.api.activation.revalidate())
       } catch (error) {
         console.error('[activation] Online tekshiruvi bajarilmadi:', error)
@@ -97,41 +114,37 @@ export default function App() {
         checking = false
       }
     }
+    const offRequired = window.api.activation.onRequired((status) => {
+      if (
+        isWebApp &&
+        status.leaseExpired &&
+        !status.reactivationPending &&
+        navigator.onLine
+      ) {
+        void revalidateIfDue()
+        return
+      }
+      setActivated(false)
+    })
     const initializeActivation = async () => {
       try {
         const status = await window.api.activation.status()
         if (
-          navigator.onLine &&
-          (status.activated || status.leaseExpired)
+          status.activated ||
+          status.reactivationPending ||
+          !status.leaseExpired ||
+          !navigator.onLine
         ) {
-          await revalidate()
-        } else {
           applyStatus(status)
         }
+        await revalidateIfDue(navigator.onLine)
       } catch (error) {
         console.error('[activation] Mahalliy aktivatsiya holati tekshirilmadi:', error)
       }
     }
-    const onOnline = () => {
-      void revalidate()
-    }
-    const dailyCheck = window.setInterval(async () => {
-      try {
-        const status = await window.api.activation.status()
-        if (
-          navigator.onLine &&
-          (status.activated || status.leaseExpired)
-        ) {
-          await revalidate()
-        } else {
-          applyStatus(status)
-        }
-      } catch (error) {
-        console.error(
-          '[activation] Mahalliy aktivatsiya holati tekshirilmadi:',
-          error
-        )
-      }
+    const onOnline = () => void revalidateIfDue(true)
+    const leaseCheck = window.setInterval(() => {
+      void revalidateIfDue()
     }, 60_000)
     void initializeActivation()
     window.addEventListener('online', onOnline)
@@ -139,7 +152,7 @@ export default function App() {
       off()
       offRequired()
       window.removeEventListener('online', onOnline)
-      window.clearInterval(dailyCheck)
+      window.clearInterval(leaseCheck)
     }
   }, [])
 
