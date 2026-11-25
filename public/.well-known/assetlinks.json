@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.azizbekavtotestilovasayt.twa",
+      "sha256_cert_fingerprints": [
+        "4A:86:7E:35:6F:9A:69:10:EF:7F:0F:D0:CE:77:76:16:28:40:1C:DD:B1:5E:DE:D5:F1:39:B0:D9:FB:B6:40:26"
+      ]
+    }
+  }
+]
